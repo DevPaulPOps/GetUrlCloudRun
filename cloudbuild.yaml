@@ -1,0 +1,33 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/braided-triode-414110/cloud-run-source-deploy/microserviceurl-image:latest', '-f', 'Dockerfile', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/braided-triode-414110/cloud-run-source-deploy/microserviceurl-image:latest']
+
+
+
+      # Terraform Init
+  - name: 'hashicorp/terraform'
+    args: [ 'init' ]
+    env: ['GOOGLE_CREDENTIALS=/workspace/terraform/account.json']
+    dir: 'terraform'
+
+  # Terraform Apply
+  - name: 'hashicorp/terraform'
+    args: [ 'apply', '-auto-approve' ]
+    env: ['GOOGLE_CREDENTIALS=/workspace/terraform/account.json']
+    dir: 'terraform'
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/braided-triode-414110/secrets/accountCredentials/versions/1
+      env: 'GOOGLE_CREDENTIALS'
+
+  # Deploy to Cloud Run
+  # - name: 'gcr.io/cloud-builders/gcloud'
+  #   args: [
+  #    'run', 'deploy', 'cloudrunservice',
+  #     '--image', 'us-central1-docker.pkg.dev/braided-triode-414110/cloud-run-source-deploy/microserviceurl-image',
+  #     '--region', 'us-central1',
+  #     '--platform', 'managed'
+  #   ]
